@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AGI Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#F5C518;--red:#2F6FED;--red-dark:#1F4FC0;
+  --bg:#F3F4F6;--card:#FFFFFF;--ink:#1A1D26;--muted:#7A8094;
+  --green:#1FAF5C;--blue:#2F6FED;--purple:#7C5CFC;
+  --nav:64px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;overflow-x:hidden;}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--ink);padding-bottom:var(--nav);}
+
+.topbar{position:sticky;top:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:10px 14px;}
+.tb-x{width:34px;height:34px;border-radius:50%;background:#E3E5EA;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);cursor:pointer;flex-shrink:0;}
+.tb-pill{flex:1;margin:0 10px;background:var(--ink);color:#fff;border-radius:30px;height:38px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:14px;font-weight:700;}
+.tb-dot{width:8px;height:8px;border-radius:50%;background:var(--red);}
+.tb-r{display:flex;align-items:center;gap:6px;}
+.tb-btn{width:34px;height:34px;border-radius:50%;background:#E3E5EA;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--ink);cursor:pointer;flex-shrink:0;}
+
+.cnt{padding:14px;}
+.page{display:none;}
+.page.active{display:block;animation:fi .2s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.welcome-card{background:var(--card);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:center;gap:14px;}
+.welcome-text{flex:1;}
+.welcome-hi{font-size:17px;font-weight:800;margin-bottom:3px;}
+.welcome-sub{font-size:12px;color:var(--muted);}
+.welcome-icon{width:54px;height:54px;border-radius:50%;background:radial-gradient(circle,#fff,#e8f5ed);display:flex;align-items:center;justify-content:center;font-size:26px;border:2px dashed var(--green);flex-shrink:0;}
+
+.bal-row{background:var(--card);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;}
+.bal-left{display:flex;align-items:center;gap:10px;}
+.bal-icon{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red-dark));display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;}
+.bal-label{font-size:11px;color:var(--muted);}
+.bal-val{font-size:18px;font-weight:800;}
+.bal-usd{font-size:11px;color:var(--green);}
+.status-badge{display:flex;align-items:center;gap:5px;background:rgba(31,175,92,.12);color:var(--green);font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pu 1.5s infinite;}
+@keyframes pu{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.4);}}
+
+.mine-panel{background:linear-gradient(160deg,var(--red),var(--red-dark));border-radius:20px;padding:18px;margin-bottom:14px;color:#fff;box-shadow:0 6px 20px rgba(232,57,43,.25);}
+.mine-row{display:flex;justify-content:space-between;margin-bottom:14px;}
+.mine-stat{flex:1;}
+.mine-stat-lb{font-size:11px;opacity:.85;margin-bottom:3px;display:flex;align-items:center;gap:5px;}
+.mine-stat-v{font-size:16px;font-weight:800;}
+.mine-stat-d{font-size:10px;opacity:.85;margin-top:2px;}
+.mine-divider{width:1px;background:rgba(255,255,255,.25);margin:0 12px;}
+.mine-active-box{background:rgba(255,255,255,.12);border-radius:14px;padding:12px 14px;margin-bottom:12px;}
+.mine-active-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.mine-active-lb{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;}
+.mine-active-time{font-size:13px;font-weight:800;font-family:monospace;}
+.mine-prog-bg{height:6px;background:rgba(255,255,255,.25);border-radius:6px;overflow:hidden;}
+.mine-prog-bar{height:100%;background:#fff;border-radius:6px;transition:width 1s linear;}
+.mine-bottom{display:flex;justify-content:space-between;align-items:center;}
+.mine-earned-lb{font-size:11px;opacity:.85;display:flex;align-items:center;gap:5px;}
+.mine-earned-v{font-size:15px;font-weight:800;}
+.mine-energy-lb{font-size:11px;opacity:.85;text-align:left;}
+.mine-energy-v{font-size:13px;font-weight:800;text-align:left;}
+
+.two-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.mini-card{background:var(--card);border-radius:16px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.mini-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:10px;}
+.mini-icon.blue{background:rgba(47,111,237,.1);color:var(--blue);}
+.mini-icon.red{background:rgba(232,57,43,.1);color:var(--red);}
+.mini-lb{font-size:12px;color:var(--muted);margin-bottom:3px;}
+.mini-val{font-size:16px;font-weight:800;margin-bottom:10px;}
+.mini-btn{width:100%;height:34px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:5px;}
+.mini-btn.start{background:var(--blue);color:#fff;}
+.mini-btn.start:disabled{background:#C9D3E8;}
+.mini-btns-row{display:flex;gap:6px;}
+.mini-btn-sm{flex:1;height:30px;border-radius:9px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:4px;}
+.mini-btn-sm.invite{background:rgba(47,111,237,.1);color:var(--blue);}
+.mini-btn-sm.copy{background:rgba(232,57,43,.1);color:var(--red);}
+
+.gold-btn{width:100%;height:50px;border-radius:16px;background:linear-gradient(135deg,var(--gold),#D9A800);color:#1a1100;font-family:'Cairo',sans-serif;font-size:15px;font-weight:800;cursor:pointer;border:none;margin-bottom:14px;box-shadow:0 4px 14px rgba(245,197,24,.3);}
+
+.sec-title{font-size:14px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.chip-row{display:flex;gap:7px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;}
+.chip{flex-shrink:0;padding:7px 16px;border-radius:20px;background:var(--card);color:var(--ink);font-size:12px;font-weight:700;cursor:pointer;border:1px solid #E3E5EA;}
+.chip.active{background:var(--red);color:#fff;border-color:var(--red);}
+
+.task-card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.task-ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.task-info{flex:1;}
+.task-t{font-size:13px;font-weight:700;}
+.task-r{font-size:11px;color:var(--green);font-weight:700;margin-top:2px;}
+.task-go{width:32px;height:32px;border-radius:50%;background:#F0F1F4;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);cursor:pointer;}
+
+.wallet-balance-card{background:var(--card);border-radius:18px;padding:20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.wb-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.wb-lb{font-size:12px;color:var(--muted);margin-bottom:2px;}
+.wb-val{font-size:26px;font-weight:900;}
+.wb-usd{font-size:12px;color:var(--green);}
+.wb-icon{width:42px;height:42px;border-radius:11px;background:rgba(47,111,237,.1);display:flex;align-items:center;justify-content:center;font-size:20px;}
+.wb-actions{display:flex;gap:10px;}
+.wb-btn{flex:1;height:44px;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:6px;}
+.wb-btn.send{background:var(--blue);color:#fff;}
+.wb-btn.recv{background:#EEF0F4;color:var(--ink);}
+
+.send-card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.send-title{font-size:13px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.send-field{background:#F3F4F6;border-radius:12px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.send-field input{flex:1;background:transparent;border:none;outline:none;font-family:'Cairo',sans-serif;font-size:13px;color:var(--ink);}
+.max-btn{font-size:11px;color:var(--blue);font-weight:800;cursor:pointer;background:rgba(47,111,237,.08);padding:4px 10px;border-radius:8px;}
+.send-confirm{width:100%;height:46px;border-radius:13px;background:var(--blue);color:#fff;font-family:'Cairo',sans-serif;font-size:14px;font-weight:800;cursor:pointer;border:none;}
+.tx-empty{background:var(--card);border-radius:16px;padding:30px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+
+.staking-empty{background:var(--card);border-radius:20px;padding:40px 24px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-top:40px;}
+.staking-icon{width:70px;height:70px;border-radius:18px;background:rgba(124,92,252,.1);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 16px;}
+.staking-title{font-size:17px;font-weight:800;margin-bottom:8px;}
+.staking-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+
+.profile-field{background:var(--card);border-radius:14px;padding:16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.profile-field-lb{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.profile-field-v{font-size:15px;font-weight:800;}
+.reward-card{background:linear-gradient(135deg,var(--red),#F0556B);border-radius:14px;padding:16px;margin-bottom:10px;color:#fff;display:flex;align-items:center;gap:12px;}
+.reward-ic{font-size:30px;}
+.reward-t{font-size:13px;font-weight:800;}
+.reward-s{font-size:11px;opacity:.9;margin-top:2px;}
+.row-item{background:var(--card);border-radius:14px;padding:15px 16px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:flex;align-items:center;gap:12px;cursor:pointer;}
+.row-icon{font-size:18px;width:24px;text-align:center;}
+.row-label{flex:1;font-size:13px;font-weight:700;}
+.row-arrow{color:var(--muted);font-size:14px;}
+.toggle{width:42px;height:24px;border-radius:14px;background:var(--blue);position:relative;cursor:pointer;flex-shrink:0;}
+.toggle-dot{width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:3px;right:21px;transition:right .2s;}
+.toggle.off{background:#D7DAE0;}
+.toggle.off .toggle-dot{right:3px;}
+.close-app{color:var(--red);}
+
+.earn-tabs{display:flex;background:var(--card);border-radius:14px;padding:4px;gap:3px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.earn-tab{flex:1;padding:9px 4px;border-radius:11px;text-align:center;font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);}
+.earn-tab.active{background:var(--red);color:#fff;}
+.ad-card{display:flex;align-items:center;gap:12px;padding:13px;background:var(--card);border-radius:14px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.05);text-decoration:none;color:var(--ink);}
+.ad-th{width:44px;height:44px;border-radius:11px;background:#F3F4F6;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.ad-i{flex:1;}
+.ad-t{font-size:13px;font-weight:700;}
+.ad-d{font-size:11px;color:var(--muted);}
+.ad-r{font-size:11px;color:var(--green);font-weight:700;margin-top:3px;}
+.ad-btn{height:32px;padding:0 14px;border-radius:9px;background:var(--red);color:#fff;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border:none;white-space:nowrap;}
+
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--card);box-shadow:0 -2px 12px rgba(0,0,0,.06);display:flex;height:var(--nav);}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--muted);position:relative;}
+.bni.active{color:var(--red);}
+.bni-ic{font-size:20px;line-height:1;}
+.bni-lb{font-size:10px;font-weight:700;}
+.bni-bd{position:absolute;top:2px;right:calc(50% - 16px);background:var(--red);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:10px;display:flex;align-items:center;justify-content:center;}
+
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:flex-end;}
+.mo.open{display:flex;}
+.md{background:var(--card);border-radius:22px 22px 0 0;padding:22px;width:100%;max-height:88vh;overflow-y:auto;}
+.md-t{font-size:16px;font-weight:800;margin-bottom:16px;}
+.ig{margin-bottom:12px;}
+.il{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px;}
+.ii{width:100%;background:#F3F4F6;border:none;border-radius:11px;padding:12px 14px;color:var(--ink);font-family:'Cairo',sans-serif;font-size:14px;outline:none;}
+.mf{display:flex;gap:8px;margin-top:14px;}
+.btn{height:44px;padding:0 16px;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:none;flex:1;}
+.btn-r{background:var(--red);color:#fff;}
+.btn-o{background:#F0F1F4;color:var(--ink);}
+.addr-box{background:#FFF8E1;border:1px solid #F5D67A;border-radius:12px;padding:14px;margin-bottom:14px;text-align:center;}
+.addr-box-lb{font-size:11px;color:#8A6D00;margin-bottom:8px;font-weight:700;}
+.addr-box-val{font-family:monospace;font-size:11px;color:#5C4400;word-break:break-all;background:rgba(245,197,24,.15);padding:10px;border-radius:8px;}
+.addr-copy{margin-top:10px;height:32px;padding:0 16px;border-radius:9px;background:var(--gold);color:#1a1100;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;border:none;}
+
+.vo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:400;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.vo.open{display:flex;}
+.vs{width:88vw;height:48vw;max-height:200px;background:var(--card);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:44px;}
+.vt{font-size:38px;font-weight:900;color:var(--gold);}
+.sk{height:42px;padding:0 26px;border-radius:12px;background:var(--gold);color:#1a1100;font-family:'Cairo',sans-serif;font-size:14px;font-weight:800;cursor:pointer;border:none;opacity:.4;pointer-events:none;}
+.sk.rdy{opacity:1;pointer-events:all;}
+
+.toast{position:fixed;bottom:78px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:12px;padding:11px 20px;font-size:13px;font-weight:700;z-index:500;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+::-webkit-scrollbar{width:0;height:0;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-x">✕</div>
+  <div class="tb-pill"><span class="tb-dot"></span><span id="tbTitle">AGI Network</span></div>
+  <div class="tb-r"><div class="tb-btn">⌄</div><div class="tb-btn">⋮</div></div>
+</div>
+
+<div class="cnt">
+
+<div class="page active" id="page-home">
+  <div class="welcome-card">
+    <div class="welcome-text"><div class="welcome-hi">👋 أهلاً، Eidmo11!</div><div class="welcome-sub">مرحباً بك في بوت تعدين AGI Network</div></div>
+    <div class="welcome-icon">🤖</div>
+  </div>
+  <div class="bal-row">
+    <div class="bal-left">
+      <div class="bal-icon">⛏️</div>
+      <div><div class="bal-label">إجمالي الرصيد</div><div class="bal-val" id="balVal">0.00 AGI</div><div class="bal-usd" id="balUsd">≈ $0.00 USD</div></div>
+    </div>
+    <div class="status-badge"><span class="status-dot"></span><span id="statusText">نشط</span></div>
+  </div>
+
+  <div class="mine-panel">
+    <div class="mine-row">
+      <div class="mine-stat">
+        <div class="mine-stat-lb">⏱ معدل التعدين</div>
+        <div class="mine-stat-v">0.0083 AGI/س</div>
+        <div class="mine-stat-d">+0% عن الأسبوع الماضي</div>
+      </div>
+      <div class="mine-divider"></div>
+      <div class="mine-stat" style="text-align:left">
+        <div class="mine-stat-lb" style="justify-content:flex-end">⚡ قوة التعدين</div>
+        <div class="mine-stat-v">24 GH/s</div>
+        <div class="mine-stat-d">+0% عن الأسبوع الماضي</div>
+      </div>
+    </div>
+    <div class="mine-active-box">
+      <div class="mine-active-top"><div class="mine-active-lb"><span class="status-dot" style="background:#fff"></span> جاري التعدين...</div><div class="mine-active-time" id="mineTimeLeft">12:00:00</div></div>
+      <div class="mine-prog-bg"><div class="mine-prog-bar" id="mineProgBar" style="width:0%"></div></div>
+    </div>
+    <div class="mine-bottom">
+      <div><div class="mine-earned-lb">🪙 الرموز المكتسبة</div><div class="mine-earned-v" id="earnedVal">0.0000 AGI</div></div>
+      <div><div class="mine-energy-lb">⚡ الطاقة</div><div class="mine-energy-v" id="energyVal">100 / 100</div></div>
+    </div>
+  </div>
+
+  <div class="two-grid">
+    <div class="mini-card">
+      <div class="mini-icon blue">⛏️</div><div class="mini-lb">جلسة التعدين</div><div class="mini-val" id="sessionStatus">متوقفة</div>
+      <button class="mini-btn start" id="mineBtn" onclick="startMining()">▶ بدء التعدين</button>
+    </div>
+    <div class="mini-card">
+      <div class="mini-icon red">👥</div><div class="mini-lb">إجمالي الإحالات</div>
+      <div class="mini-val"><span id="teamCount">0</span> · <span id="refBonus" style="color:var(--green)">0 AGI</span></div>
+      <div class="mini-btns-row"><button class="mini-btn-sm invite" onclick="go('referral')">+ دعوة</button><button class="mini-btn-sm copy" onclick="copyRef()">📋 نسخ</button></div>
+    </div>
+  </div>
+
+  <button class="gold-btn" onclick="go('earn')">🚀 ابدأ في كسب المزيد من AGI</button>
+
+  <div style="background:var(--card);border-radius:14px;padding:12px;text-align:center;margin-bottom:14px;border:1px dashed #D7DAE0">
+    <div style="font-size:10px;color:var(--muted)">— مساحة إعلانية —</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">ستظهر إعلانات حقيقية بعد تفعيل AdSense</div>
+  </div>
+</div>
+
+<div class="page" id="page-tasks">
+  <div class="sec-title">📋 مركز المهام</div>
+  <div id="requiredBox" style="background:#FFF4E5;border:2px solid var(--gold);border-radius:14px;padding:14px;margin-bottom:14px">
+    <div style="font-size:13px;font-weight:800;margin-bottom:4px">⚠️ اشتراك إلزامي قبل السحب</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">يجب الاشتراك في القناتين التاليتين لتفعيل السحب من حسابك</div>
+
+    <div class="task-card" style="margin-bottom:8px" id="reqTelegram">
+      <div class="task-ic" style="background:rgba(47,111,237,.1);color:var(--blue)">📩</div>
+      <div class="task-info"><div class="task-t">انضم لقناة الدعم الرسمية</div><div class="task-r" id="reqTgStatus">مطلوب — لم يتم التأكيد</div></div>
+      <a href="https://t.me/Free2045" target="_blank" class="task-go" style="text-decoration:none" onclick="markReq('tg')">←</a>
+    </div>
+    <div class="task-card" id="reqFacebook">
+      <div class="task-ic" style="background:rgba(47,111,237,.15);color:#1877F2">📘</div>
+      <div class="task-info"><div class="task-t">تابع صفحة فيسبوك الرسمية</div><div class="task-r" id="reqFbStatus">مطلوب — لم يتم التأكيد</div></div>
+      <a href="https://www.facebook.com/share/1FAGbyQ41X/" target="_blank" class="task-go" style="text-decoration:none" onclick="markReq('fb')">←</a>
+    </div>
+    <div style="font-size:10px;color:#8A6D00;margin-top:10px">ملاحظة: الضغط على ← يفتح الصفحة ويسجّل تأكيدك. لا يمكن التحقق تلقائياً من اشتراكك الفعلي إلا إذا تم ربط الموقع ببوت تيليغرام حقيقي.</div>
+  </div>
+
+  <div class="chip-row">
+    <div class="chip active" onclick="filterTasks(this,'all')">الكل</div>
+    <div class="chip" onclick="filterTasks(this,'hot')">🔥 ساخن</div>
+    <div class="chip" onclick="filterTasks(this,'social')">📱 اجتماعي</div>
+    <div class="chip" onclick="filterTasks(this,'partner')">🤝 شريك</div>
+    <div class="chip" onclick="filterTasks(this,'bot')">🤖 بوت</div>
+  </div>
+  <div id="tasksList">
+    <div class="task-card" data-cat="social">
+      <div class="task-ic" style="background:rgba(232,57,43,.1);color:var(--red)">👍</div>
+      <div class="task-info"><div class="task-t">تابعنا على X (تويتر)</div><div class="task-r">+0.3 AGI</div></div>
+      <a href="https://twitter.com" target="_blank" class="task-go" style="text-decoration:none">←</a>
+    </div>
+    <div class="task-card" data-cat="hot">
+      <div class="task-ic" style="background:rgba(31,175,92,.1);color:var(--green)">🎁</div>
+      <div class="task-info"><div class="task-t">دعوة 3 أصدقاء</div><div class="task-r">+2.0 AGI</div></div>
+      <div class="task-go" onclick="go('referral')">←</div>
+    </div>
+    <div class="task-card" data-cat="bot">
+      <div class="task-ic" style="background:rgba(124,92,252,.1);color:var(--purple)">🤖</div>
+      <div class="task-info"><div class="task-t">جرّب بوت Hamster Kombat</div><div class="task-r">+0.4 AGI</div></div>
+      <a href="https://t.me/hamster_kombat_bot" target="_blank" class="task-go" style="text-decoration:none">←</a>
+    </div>
+    <div class="task-card" data-cat="partner">
+      <div class="task-ic" style="background:rgba(245,197,24,.15);color:#B8860B">📺</div>
+      <div class="task-info"><div class="task-t">شاهد فيديو شريك</div><div class="task-r">+0.2 AGI</div></div>
+      <div class="task-go" onclick="watchVideo()">←</div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-wallet">
+  <div class="wallet-balance-card">
+    <div class="wb-top">
+      <div><div class="wb-lb">الرصيد المتاح</div><div class="wb-val" id="wbVal">0.00 AGI</div><div class="wb-usd" id="wbUsd">≈ $0.00</div></div>
+      <div class="wb-icon">💼</div>
+    </div>
+    <div class="wb-actions">
+      <button class="wb-btn send" onclick="openM('mWithdraw')">📤 إرسال</button>
+      <button class="wb-btn recv" onclick="openM('mDeposit')">📥 استقبال</button>
+    </div>
+  </div>
+  <div class="send-card">
+    <div class="send-title">✈️ إرسال رموز AGI</div>
+    <div class="send-field"><span style="font-size:16px">👤</span><input type="text" id="sendRecipient" placeholder="معرف المستلم"></div>
+    <div class="send-field"><span style="font-size:16px">🪙</span><input type="number" id="sendAmount" placeholder="0.00"><span class="max-btn" onclick="setMaxSend()">الأقصى</span></div>
+    <button class="send-confirm" onclick="confirmSend()">تأكيد الإرسال</button>
+  </div>
+  <div class="sec-title" style="margin-top:18px">📜 جميع المعاملات</div>
+  <div id="txContainer"><div class="tx-empty"><div style="font-size:32px;margin-bottom:8px;opacity:.4">📄</div><div style="color:var(--muted);font-size:13px">لا توجد معاملات حتى الآن</div></div></div>
+</div>
+
+<div class="page" id="page-staking">
+  <div class="staking-empty">
+    <div class="staking-icon">📦</div>
+    <div class="staking-title">رهن واكسب</div>
+    <div class="staking-desc">قم برهن رموز AGI الخاصة بك واحصل على مكافآت يومية.<br>قريباً جداً!</div>
+  </div>
+</div>
+
+<div class="page" id="page-advertiser">
+  <div class="sec-title">📢 أعلن على AGI Network</div>
+  <div class="reward-card" style="background:linear-gradient(135deg,var(--purple),#9B7FFF)">
+    <div class="reward-ic">📢</div>
+    <div><div class="reward-t">وصل لآلاف المستخدمين</div><div class="reward-s">إعلانك يظهر على الصفحة الرئيسية وصفحة الأرباح</div></div>
+  </div>
+
+  <div class="send-card">
+    <div class="send-title">🥉 الباقة الأساسية — $0.5 / أسبوع</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:10px">
+      ✅ 1,000 ظهور يومياً<br>✅ إعلان نصي في صفحة الأرباح<br>✅ رابط مباشر لموقعك أو بوتك
+    </div>
+    <button class="send-confirm" onclick="openPayModal('الأساسية',0.5)">💳 ادفع $0.5 الآن</button>
+  </div>
+
+  <div class="send-card" style="border:2px solid var(--gold)">
+    <div class="send-title">🥇 الباقة الاحترافية — $20 / أسبوع</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:10px">
+      ✅ 5,000 ظهور يومياً<br>✅ بانر في الصفحة الرئيسية<br>✅ إشعار لجميع المستخدمين<br>✅ إحصائيات أداء أسبوعية
+    </div>
+    <button class="send-confirm" onclick="openPayModal('الاحترافية',20)">💳 ادفع $20 الآن</button>
+  </div>
+
+  <div class="send-card" style="border:2px solid var(--purple)">
+    <div class="send-title">👑 باقة VIP — $50 / أسبوع</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:10px">
+      ✅ ظهور غير محدود<br>✅ شريط إعلاني ثابت بالأعلى<br>✅ رسالة ترحيبية للمستخدمين الجدد
+    </div>
+    <button class="send-confirm" onclick="openPayModal('VIP',50)">💳 ادفع $50 الآن</button>
+  </div>
+
+  <div class="send-card">
+    <div class="send-title">📩 بعد الدفع — أرسل الإيصال لتفعيل إعلانك</div>
+    <a href="https://t.me/Free2045" target="_blank" class="send-confirm" style="display:flex;align-items:center;justify-content:center;text-decoration:none;margin-bottom:8px">💬 تواصل عبر تيليغرام — قناة الدعم</a>
+    <a href="mailto:mido41405@gmail.com" class="send-confirm" style="display:flex;align-items:center;justify-content:center;text-decoration:none;background:var(--ink)">📧 mido41405@gmail.com</a>
+  </div>
+
+  <div style="background:#FFF4E5;border:1px solid #F5C518;border-radius:12px;padding:12px 14px;font-size:11px;color:#8A6D00;margin-bottom:20px">
+    ⚠️ ملاحظة: الدفع يتم بإرسالك المبلغ مباشرة من محفظتك إلى عنوان المالك أدناه. الموقع لا يتحقق تلقائياً من استلام المبلغ على البلوكشين، لذا يجب إرسال إيصال أو رابط المعاملة (TX Hash) عبر التواصل أعلاه ليُفعّل المالك إعلانك يدوياً.
+  </div>
+</div>
+
+<!-- نافذة الدفع المباشر للمعلنين -->
+<div class="mo" id="mPayAd" onclick="if(event.target===this)closeM('mPayAd')">
+  <div class="md">
+    <div class="md-t">💳 دفع مباشر — باقة <span id="payPkgName"></span></div>
+    <div style="background:rgba(31,175,92,.1);border-radius:10px;padding:10px 13px;margin-bottom:13px;font-size:13px;color:var(--green);font-weight:800;text-align:center">
+      المبلغ المطلوب: $<span id="payPkgAmount"></span>
+    </div>
+
+    <div style="display:flex;gap:6px;background:#F3F4F6;border-radius:11px;padding:4px;margin-bottom:14px">
+      <button id="payNetBep" class="btn" style="flex:1;height:36px;background:var(--ink);color:#fff" onclick="switchPayNet('bep')">🟡 BEP20 (USDT)</button>
+      <button id="payNetTon" class="btn" style="flex:1;height:36px;background:transparent;color:var(--muted)" onclick="switchPayNet('ton')">💎 TON</button>
+    </div>
+
+    <div id="payBepBox" class="addr-box">
+      <div class="addr-box-lb">عنوان الدفع — USDT (BEP20)</div>
+      <div class="addr-box-val">0xC7FA03BAE1d361401C30AAaF20333486fBe1D6b9</div>
+      <button class="addr-copy" onclick="copyAddr('0xC7FA03BAE1d361401C30AAaF20333486fBe1D6b9')">📋 نسخ العنوان</button>
+    </div>
+    <div id="payTonBox" class="addr-box" style="display:none">
+      <div class="addr-box-lb">عنوان الدفع — TON</div>
+      <div class="addr-box-val">UQA2CLot73qOKb_2BSmqOsUA0TzHYPuyB4QFT3G2quUcZdTg</div>
+      <button class="addr-copy" onclick="copyAddr('UQA2CLot73qOKb_2BSmqOsUA0TzHYPuyB4QFT3G2quUcZdTg')">📋 نسخ العنوان</button>
+    </div>
+
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">بعد إرسال المبلغ، اضغط الزر أدناه لإرسال إيصال الدفع وتفعيل إعلانك.</div>
+    <a href="https://t.me/Free2045" target="_blank" class="send-confirm" style="display:flex;align-items:center;justify-content:center;text-decoration:none">📨 إرسال إيصال الدفع الآن</a>
+    <button class="btn btn-o" style="width:100%;flex:none;margin-top:8px" onclick="closeM('mPayAd')">إغلاق</button>
+  </div>
+</div>
+
+<div class="page" id="page-earn">
+  <div class="sec-title">💰 اكسب المزيد</div>
+  <div style="background:rgba(31,175,92,.08);border:1px solid rgba(31,175,92,.2);border-radius:12px;padding:10px 13px;margin-bottom:12px;font-size:11px;color:var(--green);font-weight:600">
+    ✅ كل ربح من الإعلانات أو المهام يُضاف فوراً ومباشرة إلى رصيدك الخاص
+  </div>
+  <div class="earn-tabs">
+    <div class="earn-tab active" onclick="earnTab(this,'sites')">🌐 مواقع</div>
+    <div class="earn-tab" onclick="earnTab(this,'video')">🎬 فيديو</div>
+    <div class="earn-tab" onclick="earnTab(this,'bots')">🤖 بوتات</div>
+  </div>
+  <div id="earn-sites">
+    <a class="ad-card" href="https://faucetpay.io" target="_blank"><div class="ad-th">₿</div><div class="ad-i"><div class="ad-t">FaucetPay</div><div class="ad-d">حنفية بيتكوين حقيقية</div><div class="ad-r">✅ يدفع فعلاً</div></div></a>
+    <a class="ad-card" href="https://cointiply.com" target="_blank"><div class="ad-th">🪙</div><div class="ad-i"><div class="ad-t">Cointiply</div><div class="ad-d">ألعاب + استطلاعات</div><div class="ad-r">✅ BTC حقيقي</div></div></a>
+    <a class="ad-card" href="https://rollercoin.com" target="_blank"><div class="ad-th">🎮</div><div class="ad-i"><div class="ad-t">RollerCoin</div><div class="ad-d">العب واكسب كريبتو</div><div class="ad-r">✅ مجاني</div></div></a>
+  </div>
+  <div id="earn-video" style="display:none">
+    <div class="ad-card" onclick="watchVideo()" style="cursor:pointer"><div class="ad-th">📺</div><div class="ad-i"><div class="ad-t">إعلان 30 ثانية</div><div class="ad-r">+0.01 AGI</div></div><button class="ad-btn">شاهد</button></div>
+  </div>
+  <div id="earn-bots" style="display:none">
+    <a class="ad-card" href="https://t.me/Notcoin_bot" target="_blank"><div class="ad-th">🪙</div><div class="ad-i"><div class="ad-t">Notcoin Bot</div><div class="ad-d">35 مليون لاعب</div><div class="ad-r">✅ عملة حقيقية</div></div></a>
+    <a class="ad-card" href="https://t.me/hamster_kombat_bot" target="_blank"><div class="ad-th">🐹</div><div class="ad-i"><div class="ad-t">Hamster Kombat</div><div class="ad-d">HMSTR على Binance</div><div class="ad-r">✅ حقيقي</div></div></a>
+  </div>
+</div>
+
+<div class="page" id="page-referral">
+  <div class="reward-card"><div class="reward-ic">🎁</div><div><div class="reward-t" id="refCountText">0 أصدقاء مدعوون</div><div class="reward-s">اكسب 10% من أرباح كل صديق</div></div></div>
+  <div class="send-card">
+    <div class="send-title">🪪 كودك الخاص (فريد لك وحدك)</div>
+    <div style="text-align:center;background:#F3F4F6;border-radius:12px;padding:16px;margin-bottom:12px">
+      <div id="refCodeDisplay" style="font-size:24px;font-weight:900;letter-spacing:3px;color:var(--blue)">AGI-XXXXXX</div>
+    </div>
+    <div class="send-title">🔗 رابط الإحالة</div>
+    <div class="send-field"><input type="text" readonly id="refLink" style="font-size:11px"></div>
+    <button class="send-confirm" onclick="copyRef()">📋 نسخ الرابط</button>
+  </div>
+</div>
+
+<div class="page" id="page-profile">
+  <div class="profile-field"><div class="profile-field-lb">اسم المستخدم</div><div class="profile-field-v">Eidmo11</div></div>
+  <div class="reward-card"><div class="reward-ic">🎁</div><div><div class="reward-t" id="refCountText2">0 أصدقاء مدعوون</div><div class="reward-s">المكافآت</div></div></div>
+  <div class="row-item"><div class="row-icon">🔔</div><div class="row-label">إشعارات الدفع</div><div class="toggle" id="notifToggle" onclick="toggleNotif()"><div class="toggle-dot"></div></div></div>
+  <div class="row-item" onclick="toast('💬 الدعم: mido41405@gmail.com')"><div class="row-icon">🎧</div><div class="row-label">دعم المحادثة</div><div class="row-arrow">›</div></div>
+  <div class="row-item" onclick="toast('📄 الورقة البيضاء قيد التحضير')"><div class="row-icon">📄</div><div class="row-label">الورقة البيضاء</div><div class="row-arrow">›</div></div>
+  <div class="row-item" onclick="toast('🛡️ سياسة الخصوصية')"><div class="row-icon">🛡️</div><div class="row-label">سياسة الخصوصية</div><div class="row-arrow">›</div></div>
+  <div class="row-item" onclick="go('advertiser')"><div class="row-icon">📢</div><div class="row-label">أعلن معنا</div><div class="row-arrow">›</div></div>
+  <div class="row-item" onclick="go('admin')"><div class="row-icon">👑</div><div class="row-label">لوحة الإدارة</div><div class="row-arrow">›</div></div>
+  <div class="row-item close-app" onclick="toast('لإغلاق التطبيق، أغلق التبويب')"><div class="row-icon">✕</div><div class="row-label">إغلاق التطبيق</div><div class="row-arrow">›</div></div>
+</div>
+
+<div class="page" id="page-admin">
+  <div id="adminLogin">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:55vh;gap:14px">
+      <div style="font-size:54px">🔐</div><div style="font-size:19px;font-weight:800">لوحة الإدارة</div><div style="font-size:12px;color:var(--muted)">للمالك فقط</div>
+      <input class="ii" id="aUser" type="text" placeholder="اسم المستخدم" style="width:240px;text-align:center">
+      <input class="ii" id="aPass" type="password" placeholder="كلمة المرور" style="width:240px;text-align:center" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn btn-r" style="flex:none;padding:0 36px" onclick="doLogin()">دخول</button>
+      <div id="aErr" style="color:var(--red);font-size:12px;display:none">❌ بيانات خاطئة</div>
+    </div>
+  </div>
+  <div id="adminPanel" style="display:none">
+    <div class="reward-card"><div class="reward-ic">👑</div><div><div class="reward-t">محفظة المالك — eidmo11</div><div class="reward-s" id="ownerBal">$0.00</div></div></div>
+    <div class="two-grid">
+      <div class="mini-card"><div class="mini-lb">المستخدمون</div><div class="mini-val" id="adUsers">0</div></div>
+      <div class="mini-card"><div class="mini-lb">المعدنون النشطون</div><div class="mini-val" id="adMiners">0</div></div>
+    </div>
+
+    <div class="sec-title" style="margin-top:6px">📋 طلبات سحب المشتركين</div>
+    <div id="pendingWList"></div>
+
+    <div class="sec-title" style="margin-top:6px">💰 محفظة دعم البوت</div>
+    <div style="background:#FFF4E5;border:1px solid #F5C518;border-radius:12px;padding:12px 14px;font-size:11px;color:#8A6D00;margin-bottom:12px">
+      هذه هي محفظتك الرئيسية التي يجب تمويلها بمال حقيقي. سحوبات المشتركين الحقيقية تُدفع يدوياً من هذه المحفظة بعد مراجعة كل طلب سحب، وليس تلقائياً.
+    </div>
+
+    <div class="send-card">
+      <div class="send-title">📥 الإيداع لدعم البوت — TON</div>
+      <div class="addr-box" style="margin-bottom:0">
+        <div class="addr-box-lb">عنوان المحفظة الرئيسية — TON</div>
+        <div class="addr-box-val">UQA2CLot73qOKb_2BSmqOsUA0TzHYPuyB4QFT3G2quUcZdTg</div>
+        <button class="addr-copy" onclick="copyAddr('UQA2CLot73qOKb_2BSmqOsUA0TzHYPuyB4QFT3G2quUcZdTg')">📋 نسخ العنوان</button>
+      </div>
+    </div>
+
+    <div class="send-card">
+      <div class="send-title">📥 الإيداع لدعم البوت — BEP20</div>
+      <div class="addr-box" style="margin-bottom:0">
+        <div class="addr-box-lb">عنوان المحفظة الرئيسية — BEP20 (BSC)</div>
+        <div class="addr-box-val">0xC7FA03BAE1d361401C30AAaF20333486fBe1D6b9</div>
+        <button class="addr-copy" onclick="copyAddr('0xC7FA03BAE1d361401C30AAaF20333486fBe1D6b9')">📋 نسخ العنوان</button>
+      </div>
+    </div>
+
+    <div class="send-card">
+      <div class="send-title">📤 سحب من محفظة الدعم</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">لسحب أرباحك كمالك، أرسل من نفس عنوان TON أو BEP20 أعلاه إلى محفظتك الشخصية الخارجية باستخدام تطبيق المحفظة (Tonkeeper أو Trust Wallet) مباشرة. هذا الموقع لا يحرّك الأموال فعلياً.</div>
+      <a href="https://tonkeeper.com" target="_blank" class="send-confirm" style="display:flex;align-items:center;justify-content:center;text-decoration:none;margin-bottom:8px">💎 فتح Tonkeeper</a>
+      <a href="https://trustwallet.com" target="_blank" class="send-confirm" style="display:flex;align-items:center;justify-content:center;text-decoration:none;background:var(--ink)">🟡 فتح Trust Wallet (BEP20)</a>
+    </div>
+
+    <button class="btn btn-o" style="width:100%;flex:none;margin-top:10px" onclick="doLogout()">🚪 تسجيل الخروج</button>
+  </div>
+</div>
+
+</div>
+
+<nav class="bnav">
+  <div class="bni active" onclick="go('home')"><div class="bni-ic">🏠</div><div class="bni-lb">الرئيسية</div></div>
+  <div class="bni" onclick="go('wallet')"><div class="bni-ic">💼</div><div class="bni-lb">المحفظة</div></div>
+  <div class="bni" onclick="go('staking')"><div class="bni-ic">📦</div><div class="bni-lb">الرهن</div></div>
+  <div class="bni" onclick="go('tasks')"><div class="bni-ic">✅</div><div class="bni-lb">المهام</div><div class="bni-bd" id="taskBadge">1</div></div>
+  <div class="bni" onclick="go('profile')"><div class="bni-ic">👤</div><div class="bni-lb">الملف</div></div>
+</nav>
+
+<div class="mo" id="mDeposit" onclick="if(event.target===this)closeM('mDeposit')">
+  <div class="md">
+    <div class="md-t">📥 استقبال — إيداع</div>
+
+    <div style="display:flex;gap:6px;background:#F3F4F6;border-radius:11px;padding:4px;margin-bottom:14px">
+      <button id="netBep" class="btn" style="flex:1;height:36px;background:var(--ink);color:#fff" onclick="switchNet('bep')">🟡 BEP20 (BSC)</button>
+      <button id="netTon" class="btn" style="flex:1;height:36px;background:transparent;color:var(--muted)" onclick="switchNet('ton')">💎 TON</button>
+    </div>
+
+    <div id="bepBox" class="addr-box">
+      <div class="addr-box-lb">📋 عنوان الإيداع — شبكة BEP20 (BSC)</div>
+      <div class="addr-box-val" id="depAddr">0xC7FA03BAE1d361401C30AAaF20333486fBe1D6b9</div>
+      <button class="addr-copy" onclick="copyAddr('0xC7FA03BAE1d361401C30AAaF20333486fBe1D6b9')">📋 نسخ العنوان</button>
+      <div style="font-size:10px;color:#C0392B;margin-top:10px;font-weight:700">⚠️ أرسل فقط على شبكة BEP20 (BSC) — أي شبكة أخرى = فقدان الأموال</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">✅ USDT / BNB / BUSD على شبكة BNB Smart Chain</div>
+    </div>
+
+    <div id="tonBox" class="addr-box" style="display:none">
+      <div class="addr-box-lb">📋 عنوان الإيداع — شبكة TON</div>
+      <div class="addr-box-val" id="depAddrTon">UQA2CLot73qOKb_2BSmqOsUA0TzHYPuyB4QFT3G2quUcZdTg</div>
+      <button class="addr-copy" onclick="copyAddr(document.getElementById('depAddrTon').textContent)">📋 نسخ العنوان</button>
+      <div style="font-size:10px;color:#C0392B;margin-top:10px;font-weight:700">⚠️ أرسل فقط عملات على شبكة TON (Toncoin / Jettons) إلى هذا العنوان</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">✅ هذه المحفظة الرئيسية لاستقبال الإيداعات على شبكة TON</div>
+    </div>
+
+    <button class="btn btn-o" style="width:100%;flex:none;margin-top:12px" onclick="closeM('mDeposit')">إغلاق</button>
+  </div>
+</div>
+
+
+<div class="mo" id="mWithdraw" onclick="if(event.target===this)closeM('mWithdraw')">
+  <div class="md">
+    <div class="md-t">📤 إرسال — سحب</div>
+    <div style="background:rgba(31,175,92,.1);border-radius:10px;padding:10px 13px;margin-bottom:13px;font-size:12px;color:var(--green);font-weight:700">✓ الحد الأدنى للسحب: 0.001 AGI — يُدفع يدوياً بعد موافقة المالك</div>
+    <div class="ig"><div class="il">الشبكة</div>
+      <select class="ii" id="wNet">
+        <option value="TON">💎 TON</option>
+        <option value="BEP20">🟡 BEP20 (BSC)</option>
+      </select>
+    </div>
+    <div class="ig"><div class="il">عنوان محفظتك على الشبكة المختارة</div><input class="ii" id="wAddr" type="text" placeholder="ألصق عنوان محفظتك هنا"></div>
+    <div class="ig"><div class="il">المبلغ</div><input class="ii" id="wAmt" type="number" placeholder="0.00"></div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:10px">سيراجع المالك طلبك ويرسل المبلغ يدوياً إلى عنوانك أعلاه على نفس الشبكة المختارة.</div>
+    <div class="mf"><button class="btn btn-r" onclick="submitWithdraw()">تأكيد السحب</button><button class="btn btn-o" onclick="closeM('mWithdraw')">إلغاء</button></div>
+  </div>
+</div>
+
+<div class="vo" id="vo">
+  <div class="vs">📺</div>
+  <div class="vt" id="vt">15</div>
+  <button class="sk" id="sk" onclick="closeVideo()">✓ احصل على المكافأة</button>
+</div>
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+function generateRefCode(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code='';
+  for(let i=0;i<6;i++) code+=chars[Math.floor(Math.random()*chars.length)];
+  return 'AGI-'+code;
+}
+function getOrCreateRefCode(){
+  let code=localStorage.getItem('agi_myRefCode');
+  if(!code){
+    code=generateRefCode();
+    localStorage.setItem('agi_myRefCode',code);
+  }
+  return code;
+}
+
+const ST = {
+  balance: parseFloat(localStorage.getItem('agi_bal')||'0'),
+  earned: parseFloat(localStorage.getItem('agi_earned')||'0'),
+  mining: localStorage.getItem('agi_mining')==='1',
+  mineStart: parseInt(localStorage.getItem('agi_mineStart')||'0'),
+  team: parseInt(localStorage.getItem('agi_team')||'0'),
+  refBonus: parseFloat(localStorage.getItem('agi_refBonus')||'0'),
+  tx: JSON.parse(localStorage.getItem('agi_tx')||'[]'),
+  reqTg: localStorage.getItem('agi_reqTg')==='1',
+  reqFb: localStorage.getItem('agi_reqFb')==='1',
+  refCode: getOrCreateRefCode(),
+};
+const MINE_DURATION = 12*60*60*1000;
+const MINE_RATE_HOUR = 0.0083;
+const USD_RATE = 1.2;
+
+function save(){
+  localStorage.setItem('agi_bal',ST.balance);
+  localStorage.setItem('agi_earned',ST.earned);
+  localStorage.setItem('agi_mining',ST.mining?'1':'0');
+  localStorage.setItem('agi_mineStart',ST.mineStart);
+  localStorage.setItem('agi_team',ST.team);
+  localStorage.setItem('agi_refBonus',ST.refBonus);
+  localStorage.setItem('agi_tx',JSON.stringify(ST.tx.slice(-20)));
+  localStorage.setItem('agi_reqTg',ST.reqTg?'1':'0');
+  localStorage.setItem('agi_reqFb',ST.reqFb?'1':'0');
+}
+
+const titles={home:'AGI Network',tasks:'مركز المهام',wallet:'محفظتي',staking:'تجمع الرهن',earn:'اكسب المزيد',referral:'الإحالة',profile:'الملف الشخصي',admin:'لوحة الإدارة',advertiser:'أعلن معنا'};
+function go(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('tbTitle').textContent=titles[id]||'AGI Network';
+  document.querySelectorAll('.bni').forEach(n=>n.classList.remove('active'));
+  const m={home:0,wallet:1,staking:2,tasks:3,profile:4};
+  if(m[id]!==undefined) document.querySelectorAll('.bni')[m[id]].classList.add('active');
+  render();
+}
+
+function startMining(){
+  if(ST.mining){toast('⏳ التعدين يعمل بالفعل');return;}
+  ST.mining=true;ST.mineStart=Date.now();save();
+  toast('✅ بدأ التعدين! سينتهي بعد 12 ساعة');
+  render();
+}
+
+function render(){
+  document.getElementById('balVal').textContent=ST.balance.toFixed(4)+' AGI';
+  document.getElementById('balUsd').textContent='≈ $'+(ST.balance*USD_RATE).toFixed(2)+' USD';
+  document.getElementById('wbVal').textContent=ST.balance.toFixed(4)+' AGI';
+  document.getElementById('wbUsd').textContent='≈ $'+(ST.balance*USD_RATE).toFixed(2);
+  document.getElementById('teamCount').textContent=ST.team;
+  document.getElementById('refBonus').textContent=ST.refBonus.toFixed(2)+' AGI';
+  document.getElementById('refCountText').textContent=ST.team+' أصدقاء مدعوون';
+  document.getElementById('refCountText2').textContent=ST.team+' أصدقاء مدعوون';
+  const refLinkEl=document.getElementById('refLink');
+  if(refLinkEl) refLinkEl.value=getRefUrl();
+  const refCodeEl=document.getElementById('refCodeDisplay');
+  if(refCodeEl) refCodeEl.textContent=ST.refCode;
+
+  const now=Date.now();
+  if(ST.mining){
+    const elapsed=now-ST.mineStart;
+    if(elapsed>=MINE_DURATION){
+      const reward=MINE_RATE_HOUR*12;
+      ST.balance+=reward;ST.earned+=reward;ST.mining=false;
+      addTx('⛏️ مكافأة تعدين','+'+reward.toFixed(4)+' AGI');
+      save();toast('🎉 اكتمل التعدين! +'+reward.toFixed(4)+' AGI');render();return;
+    }
+    const pct=(elapsed/MINE_DURATION)*100;
+    const remaining=MINE_DURATION-elapsed;
+    const h=Math.floor(remaining/3600000),m=Math.floor((remaining%3600000)/60000),s=Math.floor((remaining%60000)/1000);
+    document.getElementById('mineTimeLeft').textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    document.getElementById('mineProgBar').style.width=pct+'%';
+    document.getElementById('earnedVal').textContent=(MINE_RATE_HOUR*(elapsed/3600000)).toFixed(4)+' AGI';
+    document.getElementById('sessionStatus').textContent='نشطة';
+    document.getElementById('mineBtn').textContent='⏳ جاري التعدين...';
+    document.getElementById('mineBtn').disabled=true;
+    document.getElementById('statusText').textContent='يعدّن';
+  } else {
+    document.getElementById('mineTimeLeft').textContent='12:00:00';
+    document.getElementById('mineProgBar').style.width='0%';
+    document.getElementById('earnedVal').textContent='0.0000 AGI';
+    document.getElementById('sessionStatus').textContent='متوقفة';
+    document.getElementById('mineBtn').textContent='▶ بدء التعدين';
+    document.getElementById('mineBtn').disabled=false;
+    document.getElementById('statusText').textContent='نشط';
+  }
+  renderTx();
+  checkRequired();
+}
+
+function addTx(type,amount){
+  ST.tx.unshift({type,amount,date:new Date().toLocaleString('ar-SA',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})});
+  save();
+}
+function renderTx(){
+  const el=document.getElementById('txContainer');
+  if(!el)return;
+  if(ST.tx.length===0){el.innerHTML='<div class="tx-empty"><div style="font-size:32px;margin-bottom:8px;opacity:.4">📄</div><div style="color:var(--muted);font-size:13px">لا توجد معاملات حتى الآن</div></div>';return;}
+  el.innerHTML=ST.tx.slice(0,15).map(t=>'<div class="task-card"><div class="task-ic" style="background:rgba(31,175,92,.1);color:var(--green)">💰</div><div class="task-info"><div class="task-t">'+t.type+'</div><div style="font-size:11px;color:var(--muted)">'+t.date+'</div></div><div style="color:var(--green);font-weight:800;font-size:13px">'+t.amount+'</div></div>').join('');
+}
+
+function filterTasks(chip,cat){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  document.querySelectorAll('#tasksList .task-card').forEach(c=>{c.style.display=(cat==='all'||c.dataset.cat===cat)?'flex':'none';});
+}
+
+function earnTab(tab,type){
+  document.querySelectorAll('.earn-tab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  ['sites','video','bots'].forEach(t=>{const e=document.getElementById('earn-'+t);if(e)e.style.display=t===type?'block':'none';});
+}
+
+function markReq(which){
+  setTimeout(()=>{
+    if(which==='tg'){ST.reqTg=true;document.getElementById('reqTgStatus').textContent='✅ تم التأكيد';document.getElementById('reqTgStatus').style.color='var(--green)';}
+    if(which==='fb'){ST.reqFb=true;document.getElementById('reqFbStatus').textContent='✅ تم التأكيد';document.getElementById('reqFbStatus').style.color='var(--green)';}
+    save();
+    toast('✅ تم تأكيد الاشتراك');
+  },1500);
+}
+
+function checkRequired(){
+  if(document.getElementById('reqTgStatus')){
+    document.getElementById('reqTgStatus').textContent=ST.reqTg?'✅ تم التأكيد':'مطلوب — لم يتم التأكيد';
+    document.getElementById('reqTgStatus').style.color=ST.reqTg?'var(--green)':'';
+    document.getElementById('reqFbStatus').textContent=ST.reqFb?'✅ تم التأكيد':'مطلوب — لم يتم التأكيد';
+    document.getElementById('reqFbStatus').style.color=ST.reqFb?'var(--green)':'';
+  }
+}
+function renderPendingWithdrawals(){
+  const el=document.getElementById('pendingWList');
+  if(!el)return;
+  const list=JSON.parse(localStorage.getItem('agi_pendingW')||'[]');
+  if(list.length===0){el.innerHTML='<div class="tx-empty" style="margin-bottom:12px"><div style="font-size:13px;color:var(--muted)">لا توجد طلبات سحب حالياً</div></div>';return;}
+  el.innerHTML=list.map(w=>`
+    <div class="task-card" style="margin-bottom:8px;align-items:flex-start;flex-direction:column;gap:8px">
+      <div style="display:flex;width:100%;justify-content:space-between;align-items:center">
+        <div style="font-size:13px;font-weight:800">${w.amount} AGI <span style="font-size:11px;color:var(--muted);font-weight:600">(${w.network})</span></div>
+        <div style="font-size:11px;font-weight:700;color:${w.status==='معلق'?'#B8860B':w.status==='مدفوع'?'var(--green)':'var(--muted)'}">${w.status}</div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);font-family:monospace;word-break:break-all;width:100%">${w.address}</div>
+      <div style="font-size:10px;color:var(--muted)">${w.date} — المستخدم: ${w.user}</div>
+      ${w.status==='معلق'?`<div style="display:flex;gap:6px;width:100%">
+        <button class="ad-btn" style="flex:1;background:var(--green)" onclick="approveW('${w.id}')">✅ تمت الدفعة</button>
+        <button class="ad-btn" style="flex:1;background:#C0392B" onclick="rejectW('${w.id}')">❌ رفض وإرجاع</button>
+      </div>`:''}
+    </div>
+  `).join('');
+}
+
+function approveW(id){
+  const list=JSON.parse(localStorage.getItem('agi_pendingW')||'[]');
+  const item=list.find(w=>w.id===id);
+  if(item){item.status='مدفوع';localStorage.setItem('agi_pendingW',JSON.stringify(list));}
+  renderPendingWithdrawals();
+  toast('✅ تم تسجيل الطلب كمدفوع');
+}
+
+function rejectW(id){
+  const list=JSON.parse(localStorage.getItem('agi_pendingW')||'[]');
+  const item=list.find(w=>w.id===id);
+  if(item){
+    item.status='مرفوض — أُعيد للرصيد';
+    // إعادة المبلغ لرصيد المستخدم الحالي (بيئة تجريبية بدون خادم)
+    ST.balance+=parseFloat(item.amount);
+    save();
+    localStorage.setItem('agi_pendingW',JSON.stringify(list));
+  }
+  renderPendingWithdrawals();
+  render();
+  toast('↩️ تم رفض الطلب وإرجاع المبلغ للرصيد');
+}
+
+function confirmSend(){
+  const r=document.getElementById('sendRecipient').value.trim();
+  const a=parseFloat(document.getElementById('sendAmount').value)||0;
+  if(!r){toast('❌ أدخل معرف المستلم');return;}
+  if(a<=0||a>ST.balance){toast('❌ مبلغ غير صالح');return;}
+  ST.balance-=a;save();addTx('✈️ إرسال إلى '+r,'-'+a.toFixed(4)+' AGI');toast('✅ تم الإرسال بنجاح');render();
+}
+
+function submitWithdraw(){
+  if(!ST.reqTg || !ST.reqFb){
+    closeM('mWithdraw');
+    toast('❌ يجب الاشتراك في القناتين المطلوبتين أولاً (صفحة المهام)');
+    go('tasks');
+    return;
+  }
+  const net=document.getElementById('wNet').value;
+  const addr=document.getElementById('wAddr').value.trim();
+  const amt=parseFloat(document.getElementById('wAmt').value)||0;
+  if(!addr){toast('❌ أدخل عنوان محفظتك');return;}
+  if(amt<0.001){toast('❌ الحد الأدنى 0.001 AGI');return;}
+  if(amt>ST.balance){toast('❌ الرصيد غير كافٍ');return;}
+
+  ST.balance-=amt;
+  addTx('📤 سحب إلى '+addr.substring(0,10)+'... ('+net+')','-'+amt.toFixed(4)+' AGI');
+
+  // تسجيل الطلب في قائمة طلبات السحب المعلقة لمراجعة المالك
+  const pending=JSON.parse(localStorage.getItem('agi_pendingW')||'[]');
+  pending.unshift({
+    id:'W'+Date.now(),
+    user:'Eidmo11',
+    network:net,
+    address:addr,
+    amount:amt.toFixed(4),
+    status:'معلق',
+    date:new Date().toLocaleString('ar-SA',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})
+  });
+  localStorage.setItem('agi_pendingW',JSON.stringify(pending.slice(0,50)));
+
+  save();
+  closeM('mWithdraw');
+  toast('✅ طلب السحب أُرسل — بانتظار موافقة المالك ودفعه يدوياً');
+  render();
+}
+
+function openPayModal(pkgName,amount){
+  document.getElementById('payPkgName').textContent=pkgName;
+  document.getElementById('payPkgAmount').textContent=amount;
+  switchPayNet('bep');
+  openM('mPayAd');
+}
+function switchPayNet(net){
+  const bep=document.getElementById('payNetBep'),ton=document.getElementById('payNetTon');
+  const bepBox=document.getElementById('payBepBox'),tonBox=document.getElementById('payTonBox');
+  if(net==='bep'){
+    bep.style.background='var(--ink)';bep.style.color='#fff';
+    ton.style.background='transparent';ton.style.color='var(--muted)';
+    bepBox.style.display='block';tonBox.style.display='none';
+  } else {
+    ton.style.background='var(--ink)';ton.style.color='#fff';
+    bep.style.background='transparent';bep.style.color='var(--muted)';
+    tonBox.style.display='block';bepBox.style.display='none';
+  }
+}
+
+function switchNet(net){
+  const bep=document.getElementById('netBep'),ton=document.getElementById('netTon');
+  const bepBox=document.getElementById('bepBox'),tonBox=document.getElementById('tonBox');
+  if(net==='bep'){
+    bep.style.background='var(--ink)';bep.style.color='#fff';
+    ton.style.background='transparent';ton.style.color='var(--muted)';
+    bepBox.style.display='block';tonBox.style.display='none';
+  } else {
+    ton.style.background='var(--ink)';ton.style.color='#fff';
+    bep.style.background='transparent';bep.style.color='var(--muted)';
+    tonBox.style.display='block';bepBox.style.display='none';
+  }
+}
+function copyAddr(addr){
+  const a=addr||'0xC7FA03BAE1d361401C30AAaF20333486fBe1D6b9';
+  if(a.includes('لم يتم')){toast('❌ لم يتم ضبط عنوان TON بعد');return;}
+  navigator.clipboard&&navigator.clipboard.writeText(a);toast('📋 تم نسخ العنوان');
+}
+function getRefUrl(){return 'https://t.me/AGI_Network_bot?start='+ST.refCode;}
+function copyRef(){navigator.clipboard&&navigator.clipboard.writeText(getRefUrl());toast('📋 تم نسخ رابط الإحالة الخاص بك');}
+
+let vt;
+function watchVideo(){
+  document.getElementById('vo').classList.add('open');
+  let t=15;document.getElementById('vt').textContent=t;
+  const sk=document.getElementById('sk');sk.classList.remove('rdy');sk.style.pointerEvents='none';
+  vt=setInterval(()=>{t--;document.getElementById('vt').textContent=t;
+    if(t<=0){clearInterval(vt);document.getElementById('vt').textContent='✓';sk.classList.add('rdy');sk.style.pointerEvents='all';}
+  },1000);
+}
+function closeVideo(){
+  document.getElementById('vo').classList.remove('open');
+  ST.balance+=0.01;save();addTx('📺 مشاهدة إعلان','+0.01 AGI');toast('🎉 +0.01 AGI');render();
+}
+
+function toggleNotif(){document.getElementById('notifToggle').classList.toggle('off');}
+
+function doLogin(){
+  const u=document.getElementById('aUser').value.trim(),p=document.getElementById('aPass').value;
+  if(u==='eidmo11'&&btoa(p)===btoa('Mno112233')){
+    document.getElementById('adminLogin').style.display='none';
+    document.getElementById('adminPanel').style.display='block';
+    document.getElementById('aErr').style.display='none';
+    document.getElementById('adUsers').textContent=Math.floor(Math.random()*500+100);
+    document.getElementById('adMiners').textContent=Math.floor(Math.random()*200+50);
+    document.getElementById('ownerBal').textContent='$'+(ST.balance*0.3).toFixed(2);
+    renderPendingWithdrawals();
+    toast('👑 مرحباً بالمدير!');
+  } else {document.getElementById('aErr').style.display='block';}
+}
+function doLogout(){
+  document.getElementById('adminLogin').style.display='block';
+  document.getElementById('adminPanel').style.display='none';
+  document.getElementById('aUser').value='';document.getElementById('aPass').value='';
+  go('profile');toast('تم الخروج');
+}
+
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+
+let ttm;
+function toast(msg){const e=document.getElementById('toastEl');e.textContent=msg;e.classList.add('show');clearTimeout(ttm);ttm=setTimeout(()=>e.classList.remove('show'),2800);}
+
+render();
+setInterval(render,1000);
+</script>
+</body>
+</html>
